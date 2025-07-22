@@ -2,48 +2,60 @@ const path = require("path");
 const PugPlugin = require("pug-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
+const webpack = require("webpack");
+const CopyPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const IS_DEVELOPMENT = process.env.NODE_ENV !== "production";
 
 const dirApp = path.join(__dirname, "app");
-const dirAssets = path.join(__dirname, "assets");
+const dirImages = path.join(__dirname, "images");
+const dirVideos = path.join(__dirname, "videos");
 const dirShared = path.join(__dirname, "shared");
 const dirStyles = path.join(__dirname, "styles");
+const dirNode = "node_modules";
 
 module.exports = {
   mode: IS_DEVELOPMENT ? "development" : "production",
-  entry: {
-    index: "./app/views/index.pug",
-  },
+  entry: [path.join(dirApp, "index.js"), path.join(dirStyles, "index.scss")],
   output: {
     path: path.join(__dirname, "public"),
     publicPath: "/",
-    filename: "assets/js/[name].[contenthash:8].js",
+    // filename: "[name].js",
     clean: true,
   },
   resolve: {
-    modules: [dirApp, dirAssets, dirShared, dirStyles, "node_modules"],
+    modules: [dirApp, dirShared, dirStyles, dirNode, dirImages, dirVideos],
     alias: {
       "@app": dirApp,
-      "@assets": dirAssets,
       "@shared": dirShared,
       "@styles": dirStyles,
+      "@dirNode": dirNode,
+      "@dirImages": dirImages,
+      "@dirVideos": dirVideos,
     },
   },
   plugins: [
-    new PugPlugin({
-      pretty: IS_DEVELOPMENT,
-      extractCss: {
-        filename: "assets/css/[name].[contenthash:8].css",
-      },
+    new webpack.DefinePlugin({
+      IS_DEVELOPMENT,
+    }),
+
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "./shared",
+          to: "",
+        },
+      ],
+    }),
+
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css",
     }),
   ],
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -57,38 +69,40 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          "css-loader",
           {
-            loader: "postcss-loader",
+            loader: MiniCssExtractPlugin.loader,
             options: {
-              postcssOptions: {
-                plugins: [["autoprefixer"]],
-              },
+              publicPath: "",
             },
           },
-          "sass-loader",
+          {
+            loader: "css-loader",
+          },
+          {
+            loader: "postcss-loader",
+          },
+          {
+            loader: "sass-loader",
+          },
         ],
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|webp)$/,
-        type: "asset/resource",
-        generator: {
-          filename: "assets/img/[name].[hash:8][ext]",
-        },
+        loader: "file-loader",
       },
       {
         test: /\.(woff2?|fnt)$/,
-        type: "asset/resource",
-        generator: {
-          filename: "assets/fonts/[name].[hash:8][ext]",
-        },
+        loader: "file-loader",
       },
       {
-        test: /\.mp4$/,
-        type: "asset/resource",
-        generator: {
-          filename: "assets/videos/[name].[hash:8][ext]",
-        },
+        test: /\.(glsl|frag|vert)$/,
+        loader: "raw-loader",
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(glsl|frag|vert)$/,
+        loader: "glslify-loader",
+        exclude: /node_modules/,
       },
     ],
   },
@@ -110,7 +124,7 @@ module.exports = {
             plugins: [
               ["gifsicle", { interlaced: true }],
               ["jpegtran", { progressive: true }],
-              ["optipng", { optimizationLevel: 8 }],
+              ["optipng", { optimizationLevel: 5 }],
               ["svgo", { plugins: [{ name: "preset-default" }] }],
             ],
           },
