@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "A modern Webpack boilerplate with Prismic, Pug, and SCSS",
   "scripts": {
-    "build": "webpack --progress --config webpack.config.build.js",
-    "development": "webpack serve --progress --config webpack.config.development.js",
-    "start": "npm run development"
+    "backend:build": "node app.js",
+    "backend:development": "nodemon app.js",
+    "frontend:build": "webpack --progress --config webpack.config.build.js",
+    "frontend:development": "webpack serve --progress --config webpack.config.development.js",
+    "start": "concurrently --kill-others \"npm run frontend:development\" \"npm run backend:development\""
   },
   "author": "prakhar",
   "license": "ISC",
@@ -37,5 +39,10 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
     "webpack-merge": "^6.0.1"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.0",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
   }
 }
