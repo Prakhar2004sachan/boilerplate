@@ -9,7 +9,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const IS_DEVELOPMENT = process.env.NODE_ENV !== "production";
 
 const dirApp = path.join(__dirname, "app");
-const dirImages = path.join(dirApp, "images");
+const dirImages = path.join(__dirname, "images");
 const dirVideos = path.join(__dirname, "videos");
 const dirShared = path.join(__dirname, "shared");
 const dirStyles = path.join(__dirname, "styles");
