@@ -3,9 +3,13 @@ const path = require("path");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const errorhandler = require("errorhandler");
+const dontenv = require("dotenv");
+
+dontenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
 
 // Middleware
 app.use(morgan("dev"));
