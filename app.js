@@ -4,12 +4,20 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const errorhandler = require("errorhandler");
 const dontenv = require("dotenv");
-
+const Prismic = require("@prismicio/client");
+const PrismicH = require("@prismicio/helpers");
 dontenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const initApi = (req) => {
+  return Prismic.createClient(process.env.PRISMIC_ENDPOINT, {
+    accessToken: process.env.PRISMIC_ACCESS_TOKEN,
+    req,
+    fetch,
+  });
+};
 
 // Middleware
 app.use(morgan("dev"));
@@ -22,7 +30,11 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
 // Routes
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+  const api = await initApi(req);
+  console.log(api);
+  // const defaults = await handleRequest(api);
+  // console.log(defaults);
   res.render("pages/home", {
     pageTitle: "Home Page",
     pageContent: "<p>Welcome to the Home Page!</p>",
